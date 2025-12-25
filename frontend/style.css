@@ -1,0 +1,244 @@
+/* ===== General ===== */
+body {
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  background: #fff8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 8px;
+  color: #444;
+  /* Background character */
+  /* removed external background-image (was 404) to avoid broken request */
+}
+
+/* Small corner mark (fixed) — matches the black mark in your screenshot */
+/* corner mark removed as requested */
+
+/* ===== Container ===== */
+.container {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== Card ===== */
+#auth, #app {
+  position: relative;
+  background: #fff;
+  padding: 25px 20px;
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(255, 111, 145, 0.15);
+  width: 100%;
+  transition: 0.3s;
+  z-index: 2;
+}
+
+#auth:hover, #app:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(255, 111, 145, 0.2);
+}
+
+/* ===== Site header (moved outside cards) ===== */
+.site-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 30px;
+  padding-top: 6px;
+  z-index: 2;
+}
+.site-header h1 {
+  color: #ff6f91;
+  /* bigger: min 2rem, scale with viewport, max 3.6rem */
+  font-size: clamp(2rem, 6.5vw, 3.6rem);
+  margin: 0;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,0.0);
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+/* ===== Decorative background characters ===== */
+.bg-characters { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.bg-characters .bg-char {
+  position: absolute;
+  font-size: clamp(56px, 10.5vw, 160px);
+  /* visible at 75% as requested */
+  opacity: 0.75;
+  transform-origin: center;
+  user-select: none;
+}
+.bg-characters .c1 { left: 6%; top: 60%; transform: rotate(-10deg); font-size: clamp(60px,9.5vw,150px); }
+.bg-characters .c2 { right: 8%; top: 6%; transform: rotate(15deg); font-size: clamp(48px,8.5vw,130px); opacity: 0.75; }
+.bg-characters .c3 { left: 50%; bottom: 6%; transform: translateX(-40%) rotate(-5deg); font-size: clamp(56px,10.5vw,150px); opacity: 0.75; }
+.bg-characters .c4 { right: 50%; bottom: 18%; transform: translateX(20%) rotate(8deg); font-size: clamp(44px,8vw,120px); opacity: 0.75; }
+
+@media (max-width: 480px) {
+  .site-header h1 { font-size: clamp(1.4rem,8.5vw,2.2rem); }
+  .container { padding: 12px; max-width: 420px; }
+  .bg-characters .bg-char { opacity: 0.75; font-size: clamp(28px,10vw,88px); }
+  .bg-characters .c2 { font-size: clamp(26px,9.5vw,80px); opacity: 0.75; }
+}
+
+/* ===== Inputs & Selects ===== */
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 2px solid #fcd5ce;
+  border-radius: 12px;
+  font-size: 1em;
+  transition: 0.3s;
+  background: #fff6f5;
+}
+
+/* Shorter, centered inputs for the auth area */
+#auth input, #auth select {
+  width: 90%;
+  max-width: 380px;
+  margin: 8px auto;
+  display: block;
+}
+
+/* Visual guide: box that shows the intended area for username/password */
+#auth {
+  position: relative;
+}
+/* guide removed as requested */
+
+/* Ensure actual inputs and actions appear above the guide */
+#auth input, #auth select, #auth .auth-actions {
+  position: relative;
+  z-index: 2;
+}
+
+input:focus, select:focus {
+  border-color: #ff6f91;
+  outline: none;
+  box-shadow: 0 0 6px rgba(255,111,145,0.3);
+}
+
+/* ===== Buttons ===== */
+button {
+  padding: 10px 15px;
+  margin: 5px 3px 5px 0;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #ff6f91;
+  color: white;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #ff4c70;
+  transform: translateY(-2px);
+}
+
+/* ===== Auth actions (centered login + signup) ===== */
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.auth-actions .btn-primary {
+  width: 160px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 1rem;
+}
+.no-account {
+  color: #666;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.btn-link {
+  background: transparent;
+  color: #ff6f91;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: underline;
+}
+.btn-link:hover { background: rgba(255,111,145,0.06); transform: none; }
+.signup-centered {
+  display: inline-block;
+  margin: 0 auto;
+  padding-top: 2px;
+}
+
+/* ===== Task List ===== */
+ul#taskList {
+  list-style: none;
+  padding: 0;
+  margin-top: 15px;
+  width: 100%;
+}
+
+li {
+  padding: 12px 15px;
+  margin: 8px 0;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff0f5;
+  box-shadow: 0 4px 12px rgba(255,111,145,0.1);
+  transition: 0.3s;
+}
+
+li:hover {
+  transform: translateX(5px);
+  box-shadow: 0 6px 16px rgba(255,111,145,0.15);
+}
+
+/* ===== Priority Colors ===== */
+.low {
+  background-color: #d0f4de;
+  color: #137547;
+}
+
+.medium {
+  background-color: #fff3b0;
+  color: #665c00;
+}
+
+.high {
+  background-color: #ffc9c9;
+  color: #a30000;
+}
+
+/* ===== Hidden class ===== */
+.hidden {
+  display: none;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+li.new-task {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+li.removing {
+  animation: fadeOut 0.4s ease forwards;
+}

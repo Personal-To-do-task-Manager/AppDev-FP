@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Personal To-Do List</title>
+  <!-- Link CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Personal To-Do List</h1>
+  </header>
+
+  <div class="bg-characters" aria-hidden="true">
+    <div class="bg-char c1">🐶</div>
+    <div class="bg-char c2">🐱</div>
+    <div class="bg-char c3">🐼</div>
+    <div class="bg-char c4">🦊</div>
+  </div>
+
+  <div class="container">
+    <!-- AUTH -->
+    <div id="auth">
+      
+      <input id="username" placeholder="Username">
+      <input id="password" type="password" placeholder="Password">
+
+      <div class="auth-actions">
+        <button class="btn-primary" onclick="login()">Login</button>
+        <div class="no-account">Don't have an account?</div>
+        <button class="btn-link signup-centered" onclick="register()">Sign up</button>
+      </div>
+    </div>
+
+    <!-- TODO APP -->
+    <div id="app" class="hidden">
+      <h2>My Tasks</h2>
+      <button onclick="logout()">Logout</button>
+
+      <h3>Add Task</h3>
+      <input id="taskTitle" placeholder="Task title">
+      <select id="priority">
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+      </select>
+      <button onclick="addTask()">Add</button>
+
+      <ul id="taskList"></ul>
+    </div>
+  </div>
+
+  <!-- Link JS -->
+  <script src="script.js"></script>
+</body>
+</html>
