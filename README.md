@@ -6,7 +6,7 @@ It allows users to manage personal tasks with different priority levels in a sec
 
 ---
 
-## 📌Features
+## ✨Features
 - User Registration and Login 
 - JWT Authentication
 - Add, Edit, and Delete Tasks
@@ -17,7 +17,7 @@ It allows users to manage personal tasks with different priority levels in a sec
 
 ---
 
-## 📌Technologies Used
+## 🧰Technologies Used
 
 ### Frontend
 - HTML
@@ -34,7 +34,7 @@ It allows users to manage personal tasks with different priority levels in a sec
 
 ---
 
-## 📌System Architecture
+## 🏗️System Architecture
 The system follows a client-server architecture: 
 - The frontend communicates wuth the bckend using RESTful APIs.
 - JWT tokens are used to secure protected routes.
@@ -42,11 +42,11 @@ The system follows a client-server architecture:
 
 ---
 
-## 📌Deployment
+## 🚀Deployment
 - Backend: Render
 - Frontend: Vercel
 
-## 📌Author
+## ✍️Author
 - Jahnelle Garcia
 - Melkie Gatdula
 - Jean Balderama
