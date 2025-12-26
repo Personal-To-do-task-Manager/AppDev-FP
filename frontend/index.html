@@ -103,7 +103,7 @@
     </div>
 
     <script>
-        const API = "app-dev-fp-bxyl.vercel.app";
+        const API = "https://app-dev-fp-bxyl.vercel.app/api";
         let allTasks = [];
 
         function showAddTask() {
@@ -172,7 +172,6 @@
             location.reload();
         }
 
-        // --- DATA OPERATIONS ---
         async function saveTask() {
             const title = document.getElementById('task-title').value.trim();
             const desc = document.getElementById('task-desc').value.trim();
@@ -248,7 +247,6 @@
             document.getElementById('task-priority').value = task.priority;
         }
 
-        // --- UTILS ---
         function filterTasks() {
             const search = document.getElementById('search-bar').value.toLowerCase();
             const priority = document.getElementById('filter-priority').value;
