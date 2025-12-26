@@ -13,9 +13,22 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("Successfully connected to MongoDB"))
-  .catch(err => console.log("Database Connection Error:", err));
+let isConnected = false; 
+
+const connectToDatabase = async () => {
+    if (isConnected) return;
+    const db = await mongoose.connect(process.env.MONGO_URI);
+    isConnected = db.connections[0].readyState;
+};
+
+app.use(async (req, res, next) => {
+    try {
+        await connectToDatabase();
+        next();
+    } catch (error) {
+        res.status(500).json({ error: "Database connection failed" });
+    }
+});
 
 app.post('/api/login', async (clientRequest, serverResponse) => {
     try {
