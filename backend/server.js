@@ -17,29 +17,31 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB"))
   .catch(err => console.log("Database Connection Error:", err));
 
-// --- AUTHENTICATION: LOGIN ONLY ---
 app.post('/api/login', async (clientRequest, serverResponse) => {
     try {
         const { username, password } = clientRequest.body;
-        
-        const existingUser = await UserAccountModel.findOne({ username });
-        if (!existingUser) {
-            return serverResponse.status(404).json({ message: "Account not found." });
+        let user = await UserAccountModel.findOne({ username });
+        if (!user) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user = new UserAccountModel({
+                username,
+                password: hashedPassword
+            });
+            await user.save();
+        } else {
+            const isPasswordCorrect = await bcrypt.compare(password, user.password);
+            if (!isPasswordCorrect) {
+                return serverResponse.status(401).json({ message: "Invalid credentials." });
+            }
         }
+        const sessionToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+        serverResponse.json({ token: sessionToken, userId: user._id });
 
-        const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
-        if (!isPasswordCorrect) {
-            return serverResponse.status(401).json({ message: "Invalid credentials." });
-        }
-
-        const sessionToken = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET);
-        serverResponse.json({ token: sessionToken });
     } catch (error) {
-        serverResponse.status(500).json({ message: "Server error during login." });
+        console.error(error);
+        serverResponse.status(500).json({ message: "Server error during authentication." });
     }
 });
-
-// --- TASK OPERATIONS ---
 
 app.get('/api/tasks', authenticationGuard, async (clientRequest, serverResponse) => {
     const userSpecificTasks = await TaskEntryModel.find({ userId: clientRequest.user.id });
