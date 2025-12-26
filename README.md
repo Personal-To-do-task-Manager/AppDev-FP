@@ -30,7 +30,6 @@ It allows users to manage personal tasks with different priority levels in a sec
 - Express.js
 - MongoDB
 - JWT Authentication
-- Render (deployment)
 
 ---
 
@@ -43,7 +42,7 @@ The system follows a client-server architecture:
 ---
 
 ## 🚀Deployment
-- Backend: Render
+- MongoDB
 - Frontend: Vercel
 
 ## ✍️Author
