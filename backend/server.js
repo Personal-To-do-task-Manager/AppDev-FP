@@ -78,3 +78,5 @@ const LISTENING_PORT = process.env.PORT || 5000;
 app.listen(LISTENING_PORT, () => {
     console.log(`Task Manager Server active on port ${LISTENING_PORT}`);
 });
+
+module.exports = app;
