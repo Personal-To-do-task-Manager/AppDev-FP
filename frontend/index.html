@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal To-Do Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="top-nav">
+        <div class="web-name">
+            <i class="fa-solid fa-list-check" style="margin-right: 8px;"></i>
+            Personal To-Do Task Manager
+        </div>
+        <div class="nav-actions hidden" id="logged-in-actions">
+            <button class="btn-nav" id="nav-add-btn" onclick="showAddTask()">+ Add Task</button>
+            <div class="logout-link" onclick="handleLogout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="auth-view" class="card">
+            <h2 id="auth-title">Login</h2>
+            <div id="auth-main-err" class="error-msg main-err"></div>            
+            
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter username" oninput="hideErr('err-user')">
+            <div id="err-user" class="error-msg">Username is required</div>           
+            
+            <label for="password">Password</label>
+            <div class="pass-wrapper">
+                <input type="password" id="password" placeholder="Enter password" oninput="hideErr('err-pass')">
+                <i class="fa-solid fa-eye-slash" id="togglePassword" onclick="togglePassVisibility()"></i>
+            </div>
+            <div id="err-pass" class="error-msg">Password is required</div>          
+            
+            <button onclick="handleAuth()" id="auth-btn">Login</button>
+        </div>
+
+        <div id="add-task-view" class="card hidden">
+            <h2 id="task-view-title">New Task</h2>
+            <input type="hidden" id="edit-task-id">
+            
+            <label for="task-title">Title</label>
+            <input type="text" id="task-title" oninput="hideErr('err-task-title')">
+            <div id="err-task-title" class="error-msg">Title is required</div>         
+
+            <label for="task-desc">Description</label>
+            <textarea id="task-desc" rows="3" oninput="hideErr('err-task-desc')"></textarea>
+            <div id="err-task-desc" class="error-msg">Description is required</div>   
+
+            <label>Priority Level</label>
+            <div class="custom-select" id="task-priority-dropdown">
+                <div class="custom-select-trigger placeholder">
+                    <span>Select a priority level</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="custom-select-options">
+                    <div class="custom-select-option" data-value="Low">Low Priority</div>
+                    <div class="custom-select-option" data-value="Medium">Medium Priority</div>
+                    <div class="custom-select-option" data-value="High">High Priority</div>
+                </div>
+            </div>
+            <input type="hidden" id="task-priority">
+            <div id="err-task-priority" class="error-msg">Please select a priority level</div>
+
+            <button onclick="saveTask()" id="save-btn">Create Task</button>
+            <div class="view-tasks-link" onclick="showTaskList()">View Tasks</div>
+        </div>
+
+        <div id="list-view" class="card lengthy-card hidden">
+            <div class="list-header">
+                <h2>My Tasks</h2>
+                <div class="header-controls">
+                    <div class="input-icon-wrapper" style="width: 200px;">
+                        <div class="custom-select" id="filter-priority-dropdown" style="margin-bottom: 0;">
+                            <div class="custom-select-trigger placeholder">
+                                <i class="fa-solid fa-filter filter-icon"></i>
+                                <span>Filter by Priority</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="custom-select-options">
+                                <div class="custom-select-option" data-value="All">All</div>
+                                <div class="custom-select-option" data-value="Low">Low Priority</div>
+                                <div class="custom-select-option" data-value="Medium">Medium Priority</div>
+                                <div class="custom-select-option" data-value="High">High Priority</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="filter-priority">
+                    </div>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-bar" placeholder="Search tasks..." oninput="filterTasks()">
+                    </div>
+                </div>
+            </div>
+            <div id="task-list" class="task-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = "http://localhost:5000/api";
+        let allTasks = [];
+
+        // --- NAVIGATION & UI FLOW ---
+        function showAddTask() {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('list-view').classList.add('hidden');
+            document.getElementById('add-task-view').classList.remove('hidden');
+            document.getElementById('logged-in-actions').classList.remove('hidden');
+            document.getElementById('nav-add-btn').classList.add('hidden');
+            
+            if(!document.getElementById('edit-task-id').value) {
+                resetTaskForm();
+            }
+        }
+
+        function showTaskList() {
+            document.getElementById('add-task-view').classList.add('hidden');
+            document.getElementById('list-view').classList.remove('hidden');
+            document.getElementById('nav-add-btn').classList.remove('hidden');
+            loadTasks();
+        }
+
+        function resetTaskForm() {
+            document.getElementById('task-view-title').innerText = "New Task";
+            document.getElementById('edit-task-id').value = "";
+            document.getElementById('task-title').value = "";
+            document.getElementById('task-desc').value = "";
+            document.getElementById('save-btn').innerText = "Create Task";
+            const trigger = document.querySelector('#task-priority-dropdown .custom-select-trigger');
+            trigger.querySelector('span').textContent = "Select a priority level";
+            trigger.classList.add('placeholder');
+            document.getElementById('task-priority').value = "";
+        }
+
+        // --- AUTHENTICATION (LOGIN ONLY) ---
+        async function handleAuth() {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const mainErrDiv = document.getElementById('auth-main-err');
+
+            if (!u || !p) {
+                if (!u) document.getElementById('err-user').classList.add('error-active');
+                if (!p) document.getElementById('err-pass').classList.add('error-active');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    showAddTask(); 
+                } else {
+                    mainErrDiv.innerHTML = `<div class="warning-box">${data.message}</div>`;
+                }
+            } catch (err) {
+                mainErrDiv.innerHTML = `<div class="warning-box">Server connection error.</div>`;
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            location.reload();
+        }
+
+        // --- DATA OPERATIONS ---
+        async function saveTask() {
+            const title = document.getElementById('task-title').value.trim();
+            const desc = document.getElementById('task-desc').value.trim();
+            const priority = document.getElementById('task-priority').value;
+            const editId = document.getElementById('edit-task-id').value;
+
+            if (!title) document.getElementById('err-task-title').classList.add('error-active');
+            if (!desc) document.getElementById('err-task-desc').classList.add('error-active');
+            if (!priority) document.getElementById('err-task-priority').classList.add('error-active');
+
+            if (!title || !desc || !priority) return;
+
+            const res = await fetch(editId ? `${API}/tasks/${editId}` : `${API}/tasks`, {
+                method: editId ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: JSON.stringify({ title, description: desc, priority: priority })
+            });
+
+            if (res.ok) {
+                resetTaskForm();
+                showTaskList();
+            }
+        }
+
+        async function loadTasks() {
+            const res = await fetch(API + "/tasks", {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            if (res.ok) {
+                allTasks = await res.json();
+                renderTasks(allTasks);
+            }
+        }
+
+        function renderTasks(tasks) {
+            const container = document.getElementById('task-list');
+            container.innerHTML = tasks.length ? tasks.map(t => `
+                <div class="task-item ${t.priority}">
+                    <div class="task-actions">
+                        <button class="btn-icon" onclick="editTask('${t._id}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button class="btn-icon btn-danger" onclick="deleteTask('${t._id}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <h3>${t.title}</h3>
+                    <p>${t.description}</p>
+                    <span class="priority-badge ${t.priority}">${t.priority}</span>
+                </div>`).join('') : `<div class="no-tasks">No tasks found.</div>`;
+        }
+
+        async function deleteTask(id) {
+            if (confirm("Delete this task?")) {
+                const res = await fetch(`${API}/tasks/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                if (res.ok) loadTasks();
+            }
+        }
+
+        function editTask(id) {
+            const task = allTasks.find(t => t._id === id);
+            showAddTask();
+            document.getElementById('task-view-title').innerText = "Edit Task";
+            document.getElementById('edit-task-id').value = id;
+            document.getElementById('task-title').value = task.title;
+            document.getElementById('task-desc').value = task.description;
+            document.getElementById('save-btn').innerText = "Update Task";
+            const trigger = document.querySelector('#task-priority-dropdown .custom-select-trigger');
+            trigger.querySelector('span').textContent = task.priority + " Priority";
+            trigger.classList.remove('placeholder');
+            document.getElementById('task-priority').value = task.priority;
+        }
+
+        // --- UTILS ---
+        function filterTasks() {
+            const search = document.getElementById('search-bar').value.toLowerCase();
+            const priority = document.getElementById('filter-priority').value;
+            const filtered = allTasks.filter(t => {
+                const matchSearch = t.title.toLowerCase().includes(search) || t.description.toLowerCase().includes(search);
+                const matchPriority = !priority || priority === 'All' || t.priority === priority;
+                return matchSearch && matchPriority;
+            });
+            renderTasks(filtered);
+        }
+
+        function togglePassVisibility() {
+            const p = document.getElementById('password');
+            const icon = document.getElementById('togglePassword');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            icon.className = p.type === 'password' ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        }
+
+        function hideErr(id) { document.getElementById(id).classList.remove('error-active'); }
+
+        function initCustomDropdowns() {
+            document.querySelectorAll('.custom-select').forEach(dropdown => {
+                const trigger = dropdown.querySelector('.custom-select-trigger');
+                const options = dropdown.querySelectorAll('.custom-select-option');
+                const hiddenInput = dropdown.nextElementSibling?.tagName === 'INPUT' ? dropdown.nextElementSibling : null;
+
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('open');
+                });
+
+                options.forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const val = option.getAttribute('data-value');
+                        trigger.querySelector('span').textContent = option.textContent;
+                        trigger.classList.remove('placeholder');
+                        if (hiddenInput) hiddenInput.value = val;
+                        dropdown.classList.remove('open');
+                        if (dropdown.id === 'filter-priority-dropdown') filterTasks();
+                        if (dropdown.id === 'task-priority-dropdown') hideErr('err-task-priority');
+                    });
+                });
+            });
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.custom-select').forEach(d => d.classList.remove('open'));
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCustomDropdowns();
+            if (localStorage.getItem('token')) showAddTask();
+        });
+    </script>
+</body>
+</html>
